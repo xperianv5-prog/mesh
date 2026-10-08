@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Node
+node_modules/
+dist/
+
+# Secrets
+.env
+.env.local
+
+# Data
+data/
+uploads/
+outputs/
+
+# Model weights
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+
+# OS
+.vscode/
+.idea/
+.DS_Store
