@@ -1,11 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import App from "./App";
+import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <div style={{padding: 40, fontFamily: "sans-serif"}}>
-      <h1>mesh</h1>
-      <p>2D to 3D mesh generator â€” coming soon.</p>
-    </div>
+    <App />
   </React.StrictMode>
 );
