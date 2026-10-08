@@ -1,12 +1,15 @@
-// Auto-detect API URL from current host
+// --- API URL resolution (in priority order) ---
+//   1. VITE_API_URL from .env       (used on GitHub Pages / production)
+//   2. Auto-detect from Codespaces  (e.g. -5173. -> -8000.)
+//   3. Localhost fallback           (npm run dev on your own machine)
 function getApiUrl(): string {
+  const fromEnv = import.meta.env.VITE_API_URL as string | undefined;
+  if (fromEnv && fromEnv.length > 0) return fromEnv;
+
   const origin = window.location.origin;
-  // In Codespaces: replace port in URL (e.g. -5173. → -8000.)
   const match = origin.match(/-(\d+)\./);
-  if (match) {
-    return origin.replace(`-${match[1]}.`, "-8000.");
-  }
-  // Local fallback
+  if (match) return origin.replace(`-${match[1]}.`, "-8000.");
+
   return "http://localhost:8000";
 }
 
@@ -44,8 +47,7 @@ async function request<T>(
   }
 
   if (!res.ok) {
-    const msg =
-      data?.detail || data?.message || `HTTP ${res.status}`;
+    const msg = data?.detail || data?.message || `HTTP ${res.status}`;
     throw new Error(typeof msg === "string" ? msg : JSON.stringify(msg));
   }
   return data as T;
@@ -55,10 +57,7 @@ async function request<T>(
 export async function register(email: string, password: string) {
   const data = await request<{ access_token: string }>(
     "/api/auth/register",
-    {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    }
+    { method: "POST", body: JSON.stringify({ email, password }) }
   );
   setToken(data.access_token);
   return data;
