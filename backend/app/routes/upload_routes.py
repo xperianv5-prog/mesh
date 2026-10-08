@@ -1,18 +1,20 @@
 import io
 import uuid
-from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException, BackgroundTasks
 from PIL import Image
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import User, Job, JobStatus
 from ..deps import current_user
 from ..storage import storage
+from ..pipeline.worker import run_pipeline
 
 router = APIRouter(prefix="/api", tags=["upload"])
 
 
 @router.post("/upload")
 async def upload(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     prompt: str = Form("object"),
     quality: str = Form("balanced"),
@@ -41,9 +43,6 @@ async def upload(
     db.commit()
     db.refresh(job)
 
-    return {
-        "job_id": job.id,
-        "status": "queued",
-        "message": "Image uploaded successfully",
-        "image_key": image_key,
-    }
+    background_tasks.add_task(run_pipeline, job.id)
+
+    return {"job_id": job.id, "status": "queued"}

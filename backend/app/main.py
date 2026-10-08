@@ -1,5 +1,7 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from .config import settings
 from .database import Base, engine
 from .routes.auth_routes import router as auth_router
@@ -36,3 +38,8 @@ def health():
 @app.get("/")
 def root():
     return {"status": "ok", "service": "mesh backend", "docs": "/docs"}
+
+
+if settings.STORAGE_BACKEND == "local":
+    os.makedirs(settings.LOCAL_STORAGE_ROOT, exist_ok=True)
+    app.mount("/files", StaticFiles(directory=settings.LOCAL_STORAGE_ROOT), name="files")
